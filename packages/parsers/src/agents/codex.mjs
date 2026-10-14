@@ -6,9 +6,11 @@ export function parseCodexLine({ line, filePath }) {
     if (!parsed || typeof parsed !== "object") return null;
 
     const payload = parsed.payload ?? {};
+    // payload.id is the thread id only on session_meta: newer Codex versions put
+    // item ids (msg_…, rs_…, fc_…) there on response_item lines, and on a
+    // subagent's session_meta payload.session_id is the parent session
     const sessionId =
-        payload.session_id ??
-        payload.id ??
+        (parsed.type === "session_meta" ? payload.id ?? payload.session_id : payload.session_id) ??
         parsed.session_id ??
         extractSessionIdFromPath(filePath);
 
